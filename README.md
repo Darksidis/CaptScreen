@@ -1,39 +1,40 @@
-# CaptScreen - Простая запись экрана для Windows
+# CaptScreen - Simple screen recording for Windows
 
-Консольная программа для захвата экрана с минимальным функционалом. Тестировалось на Windows 10/11.
+A console program for capturing a screen with minimal functionality. It was tested on Windows 10/11.
 
-## Установка
+## Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Использование
+## Usage
 
 ```bash
 python captscreen.py
 ```
 
-### Управление
+### Management
 
-1. **Запуск программы** - введите длительность записи в минутах (0 = без ограничений)
-2. **Начало записи** - нажмите Enter
-3. **Остановка записи** - нажмите Enter (если не установлен таймер)
+1. **Program start** - enter the recording duration in minutes (0 = unlimited)
+2. **Start recording** - press Enter
+3. **Stop recording** - press Enter (if timer is not set)
 
-### Примеры
+### Examples
 
-- **Запись 2 часа**: введите `120` при запуске
-- **Запись 3 часа**: введите `180` при запуске  
-- **Ручная остановка**: введите `0` и нажмите Enter для старта/остановки
+- **Recording 2 hours**: Enter `120` at startup
+- **Recording 3 hours**: Enter `180` at startup  
+- **Manual stop**: Enter `0` and press Enter to start/stop
 
-### Выходные файлы
+### Output files
 
-Файлы сохраняются в текущую папку с именем:
-```
+The files are saved to the current folder named:
+``
 recording_YYYY-MM-DD_HH-MM-SS.mp4
 ```
 
-## Требования
+## Requirements
 
 - Windows 10/11
+
 - Python 3.8+
