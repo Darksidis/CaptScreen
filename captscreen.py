@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-CaptScreen - Простая программа записи экрана для Windows
-Запись: нажмите Enter для старта/остановки
-Таймер: укажите длительность в минутах при запуске (0 = без ограничений)
+CaptScreen - Simple screen recorder for Windows
+Recording: press Enter to start/stop
+Timer: specify duration in minutes at startup (0 = unlimited)
 """
 
 import cv2
@@ -19,30 +19,30 @@ class ScreenRecorder:
         self.paused = False
         self.writer = None
         self.start_time = None
-        self.duration = 0  # в секундах, 0 = без ограничений
+        self.duration = 0  # in seconds, 0 = unlimited
         self.output_file = None
         
     def get_output_filename(self):
-        """Генерирует имя файла на основе текущего времени"""
+        """Generates filename based on current time"""
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         return f"recording_{timestamp}.mp4"
     
     def start_recording(self, duration_minutes=0):
-        """Начинает запись экрана"""
+        """Starts screen recording"""
         if self.recording:
-            print("Запись уже идет!")
+            print("Recording is already in progress!")
             return
             
         self.duration = duration_minutes * 60 if duration_minutes > 0 else 0
         self.output_file = self.get_output_filename()
         
-        # Получаем размеры экрана
+        # Get screen dimensions
         with mss.mss() as sct:
-            monitor = sct.monitors[1]  # Основной монитор
+            monitor = sct.monitors[1]  # Primary monitor
             self.width = monitor["width"]
             self.height = monitor["height"]
         
-        # Создаем видео writer
+        # Create video writer
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         self.writer = cv2.VideoWriter(
             self.output_file, 
@@ -55,59 +55,59 @@ class ScreenRecorder:
         self.start_time = time.time()
         
         print(f"\n{'='*50}")
-        print(f"НАЧАЛО ЗАПИСИ: {self.output_file}")
+        print(f"RECORDING STARTED: {self.output_file}")
         if self.duration > 0:
-            print(f"Длительность: {duration_minutes} минут(ы)")
-            print(f"Окончание в: {datetime.fromtimestamp(self.start_time + self.duration).strftime('%H:%M:%S')}")
+            print(f"Duration: {duration_minutes} minute(s)")
+            print(f"Ends at: {datetime.fromtimestamp(self.start_time + self.duration).strftime('%H:%M:%S')}")
         else:
-            print("Нажмите Enter для остановки записи")
+            print("Press Enter to stop recording")
         print(f"{'='*50}\n")
         
-        # Запускаем запись в отдельном потоке
+        # Start recording in separate thread
         record_thread = threading.Thread(target=self._record_loop)
         record_thread.daemon = True
         record_thread.start()
         
     def _record_loop(self):
-        """Основной цикл захвата экрана"""
+        """Main screen capture loop"""
         with mss.mss() as sct:
             monitor = sct.monitors[1]
             
             while self.recording:
-                # Проверяем таймер
+                # Check timer
                 if self.duration > 0:
                     elapsed = time.time() - self.start_time
                     if elapsed >= self.duration:
-                        print(f"\nТаймер истек! Запись остановлена.")
+                        print(f"\nTimer expired! Recording stopped.")
                         self.stop_recording()
                         break
                 
-                # Захватываем кадр
+                # Capture frame
                 screenshot = sct.grab(monitor)
                 frame = np.array(screenshot)
                 
-                # Конвертируем BGRA -> BGR для OpenCV
+                # Convert BGRA -> BGR for OpenCV
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
                 
-                # Записываем кадр
+                # Write frame
                 if self.writer is not None:
                     self.writer.write(frame)
                 
-                # Показываем время записи
+                # Display recording time
                 if self.duration > 0:
                     remaining = self.duration - (time.time() - self.start_time)
                     mins, secs = divmod(int(remaining), 60)
-                    print(f"\rОсталось: {mins:02d}:{secs:02d}", end="", flush=True)
+                    print(f"\rRemaining: {mins:02d}:{secs:02d}", end="", flush=True)
                 else:
                     elapsed = time.time() - self.start_time
                     mins, secs = divmod(int(elapsed), 60)
-                    print(f"\rЗапись: {mins:02d}:{secs:02d}", end="", flush=True)
+                    print(f"\rRecording: {mins:02d}:{secs:02d}", end="", flush=True)
                 
-                # Небольшая задержка для стабильности
+                # Small delay for stability
                 time.sleep(0.05)
     
     def stop_recording(self):
-        """Останавливает запись"""
+        """Stops recording"""
         if not self.recording:
             return
             
@@ -121,43 +121,43 @@ class ScreenRecorder:
         mins, secs = divmod(int(elapsed), 60)
         
         print(f"\n\n{'='*50}")
-        print(f"ЗАПИСЬ ОСТАНОВЛЕНА")
-        print(f"Файл: {self.output_file}")
-        print(f"Длительность: {mins:02d}:{secs:02d}")
+        print(f"RECORDING STOPPED")
+        print(f"File: {self.output_file}")
+        print(f"Duration: {mins:02d}:{secs:02d}")
         print(f"{'='*50}\n")
 
 
 def main():
     print("\n" + "="*50)
-    print("   CaptCam - Запись экрана")
+    print("   CaptScreen - Screen Recorder")
     print("="*50)
     
     recorder = ScreenRecorder()
     
-    # Запрашиваем длительность
-    print("\nВведите длительность записи в минутах (0 = без ограничений):")
+    # Ask for duration
+    print("\nEnter recording duration in minutes (0 = unlimited):")
     try:
         duration_input = input(">>> ").strip()
         duration = int(duration_input) if duration_input else 0
     except ValueError:
         duration = 0
-        print("Неверный ввод, запись без ограничений по времени")
+        print("Invalid input, recording without time limit")
     
-    print("\nНажмите Enter для начала записи...")
+    print("\nPress Enter to start recording...")
     input()
     
     recorder.start_recording(duration)
     
-    # Ждем Enter для остановки (если нет таймера)
+    # Wait for Enter to stop (if no timer)
     if duration == 0:
-        input()  # Ждем нажатия Enter
+        input()  # Wait for Enter press
         recorder.stop_recording()
     else:
-        # Ждем пока запись не закончится по таймеру
+        # Wait until recording finishes by timer
         while recorder.recording:
             time.sleep(0.1)
     
-    print("\nНажмите Enter для выхода...")
+    print("\nPress Enter to exit...")
     input()
 
 
@@ -165,4 +165,4 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\nПрограмма прервана пользователем")
+        print("\n\nProgram interrupted by user")
